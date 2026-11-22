@@ -293,7 +293,7 @@ function renderHome(){
     h+='<button class="minirow" id="tomeas"><span><span class="xs mu">Revisión de medidas · '+nr.date.toLocaleDateString('es-ES',{day:'numeric',month:'short'})+'</span><br><b>'+(dd>0?'En '+dd+' días':dd===0?'Hoy':'Pendiente')+'</b></span><span class="mu">'+I.chev+'</span></button>'; }
   h+='<div class="foot">'+(store('email')?esc(store('email'))+' · ':'')+'<button id="chsheet" class="lnk">Cambiar hoja</button> · <button id="logout" class="lnk">Cerrar sesión</button><br>Mi Entreno '+(window.APP_VERSION||'')+'</div>';
   h+='<div style="height:84px"></div>';
-  if(day.exercises.length) h+='<button class="go" id="start">'+I.play+(weekAny(day,w)&&!weekDone(tab,day,w)?'Continuar entreno':isToday?'Empezar entreno':'Abrir día '+day.n)+'</button>';
+  if(day.exercises.length) h+='<button class="go" id="start">'+I.play+(weekAny(day,w)&&!weekDone(tab,day,w)?'Continuar entreno':isToday?'Vamos al lío':'Abrir día '+day.n)+'</button>';
   $app.innerHTML=h;
   document.getElementById('tabsel').onchange=function(){ S.tab=this.value; S.homeDay=null; render(); };
   $app.querySelectorAll('[data-day]').forEach(function(b){ b.onclick=function(){ var n=+b.dataset.day; S.homeDay=(nx&&nx.day.n===n)?null:n; renderHome(); }; });
@@ -339,7 +339,7 @@ function renderWorkout(){
   if(i>=N){
     var sv=day.exercises.filter(function(e){return e.loads[w]&&e.loads[w].t;}).length, gr=day.exercises.filter(function(e){return e.loads[w]&&e.loads[w].g;}).length;
     var fk='fin|'+key(tab.name,day.n,w), fin=store(fk)||{};
-    body='<div class="fin"><div class="wo-k">Día '+day.n+' · semana '+(w+1)+'</div><h2>'+(sv===N?'¡Día completo!':'Casi está')+'</h2><p class="mu sm" style="margin:0">'+(sv===N?'Todo guardado en tu hoja. Buen trabajo.':(N-sv)+(N-sv===1?' ejercicio sin apuntar':' ejercicios sin apuntar')+' (saltados o pendientes). Puedes volver atrás o terminar igualmente.')+'</p>'+
+    body='<div class="fin"><div class="wo-k">Día '+day.n+' · semana '+(w+1)+'</div><h2>'+(sv===N?'¡Día completo!':'Casi está')+'</h2><p class="mu sm" style="margin:0">'+(sv===N?'Todo guardado en tu hoja. Hoy te has ganado el descanso.':(N-sv)+(N-sv===1?' ejercicio sin apuntar':' ejercicios sin apuntar')+' (saltados o pendientes). Puedes volver atrás o terminar igualmente.')+'</p>'+
       '<div class="fstats"><div><b class="n">'+sv+'/'+N+'</b><span>ejercicios</span></div><div><b class="n" style="color:var(--ok)">'+gr+'</b><span>marcas en verde</span></div><div><b class="n">'+(w+1)+'</b><span>semana</span></div></div>'+
       (tab.cardio?'<button class="chk'+(fin.c?' on':'')+'" data-x="c"><span class="bx">'+(fin.c?I.cks:'')+'</span><span><b>Cardio</b><br><span class="sm mu">'+esc(cap(tab.cardio))+'</span></span></button>':'')+
       (tab.abs.length?'<button class="chk'+(fin.a?' on':'')+'" data-x="a"><span class="bx">'+(fin.a?I.cks:'')+'</span><span style="flex:1"><b>Abdomen</b> <span class="sm mu">· 3 días por semana</span><div class="abl">'+tab.abs.map(function(a){return '<div><span>'+esc(cap(a.name))+'</span><span>'+esc(a.dose)+'</span></div>';}).join('')+'</div></span></button>':'')+'</div>';
@@ -348,7 +348,7 @@ function renderWorkout(){
     bindWorkoutCommon(N);
     L.querySelectorAll('[data-x]').forEach(function(b){ b.onclick=function(){ fin[b.dataset.x]=!fin[b.dataset.x]; store(fk,fin); S.wo.dir=''; renderWorkout(); }; });
     document.getElementById('wfin').onclick=function(){ var b=this; b.disabled=true; b.textContent='Guardando…';
-      run('finishDay',{tab:tab.name,dayN:day.n,dayName:day.name,week:w,cardio:!!fin.c,abs:!!fin.a}).then(function(){ var k=key(tab.name,day.n,w); if(S.st.done.indexOf(k)<0) S.st.done.push(k); S.homeDay=null; toast('Día '+day.n+' terminado'); closeWorkout(); })
+      run('finishDay',{tab:tab.name,dayN:day.n,dayName:day.name,week:w,cardio:!!fin.c,abs:!!fin.a}).then(function(){ var k=key(tab.name,day.n,w); if(S.st.done.indexOf(k)<0) S.st.done.push(k); S.homeDay=null; toast('Día '+day.n+' terminado. ¡Qué arte!'); closeWorkout(); })
       .catch(function(e){ fail(e); b.disabled=false; b.textContent='Terminar día'; }); };
     return;
   }
@@ -410,10 +410,10 @@ function renderWorkout(){
       '<div class="fld" style="margin-top:4px"><label for="skr">Otro motivo</label><input id="skr" placeholder="Escribe el motivo" style="font-family:var(--body);font-size:18px;font-weight:600"></div>'+
       '<button class="btn" id="sko" style="margin-top:10px">Apuntar motivo y seguir</button>');
     document.querySelectorAll('[data-sk]').forEach(function(b){ b.onclick=function(){ var r=b.dataset.sk; close();
-      if(!r){ d.skipped=true; saveDrafts(); toast('Ejercicio saltado'); go(1); } else write(r,false,null,'Motivo guardado en tu hoja'); }; });
+      if(!r){ d.skipped=true; saveDrafts(); toast('Ejercicio saltado. Otro día será'); go(1); } else write(r,false,null,'Motivo guardado en tu hoja'); }; });
     document.getElementById('sko').onclick=function(){ var r=document.getElementById('skr').value.trim(); if(!r) return toast('Escribe el motivo',true); close(); write(r,false,null,'Motivo guardado en tu hoja'); };
   };
-  if(q('wsave')) q('wsave').onclick=function(){ write(draftText(d),d.g,this,d.g?'Marca conseguida · celda en verde':'Guardado en tu hoja'); };
+  if(q('wsave')) q('wsave').onclick=function(){ write(draftText(d),d.g,this,d.g?'¡Ole! Marca conseguida · celda en verde':'Guardado en tu hoja'); };
 
 }
 function go(step){ var N=woCtx().day.exercises.length; S.wo.i=Math.max(0,Math.min(N,S.wo.i+step)); S.wo.dir=step>0?'slide-l':'slide-r'; renderWorkout(); document.getElementById('wb').scrollTop=0; }
@@ -631,7 +631,7 @@ function openRevision(){
       METRICS.forEach(function(x){ m[x[0]]=F[x[0]]; });
       if(METRICS.every(function(x){return m[x[0]]==null;})&&!hasPh) return toast('Apunta al menos una medida o una foto',true);
       b.disabled=true; b.textContent='Guardando…';
-      run('saveMeasure',m).then(function(r){ S.st.measures=r; S.newPhotos={}; close(); S.mtab='resumen'; toast('Revisión guardada'); renderMeasures(); })
+      run('saveMeasure',m).then(function(r){ S.st.measures=r; S.newPhotos={}; close(); S.mtab='resumen'; toast('Revisión guardada. ¡Vamos!'); renderMeasures(); })
         .catch(function(e){ fail(e); b.disabled=false; b.textContent='Guardar revisión'; });
     };
   };
