@@ -273,7 +273,7 @@ function renderHome(){
   var total=0, done=0; tab.days.forEach(function(d){ if(!d.exercises.length) return; total+=d.weeks.length; for(var i=0;i<d.weeks.length;i++) if(weekAny(d,i)) done++; });
   h+='<div class="wk"><span>Semana '+(rw+1)+' de '+(day.weeks.length||'?')+'</span><span>'+done+' de '+total+' sesiones del mesociclo</span></div>';
 
-  h+='<div class="today"><span class="num" aria-hidden="true">'+String(day.n).padStart(2,'0')+'</span><div class="k">'+(isToday?'Hoy te toca':nx&&nx.done?'Mesociclo completado':'Día '+day.n+' · semana '+(w+1))+'</div>'+
+  h+='<div class="today"><span class="num" aria-hidden="true">'+String(day.n).padStart(2,'0')+'</span><div class="k">'+(isToday?'Lo que toca hoy':nx&&nx.done?'Mesociclo completado':'Día '+day.n+' · semana '+(w+1))+'</div>'+
      '<h2>'+esc(day.name)+'</h2><div class="meta">'+day.exercises.length+' ejercicios · '+day.exercises.reduce(function(a,e){return a+(parseInt(e.series,10)||0);},0)+' series</div></div>';
   h+='<ul class="exlist">'+day.exercises.map(function(e,i){
     var sv=e.loads[w]&&e.loads[w].t, l=lastFor(tab,e,w);
