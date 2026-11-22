@@ -13,7 +13,7 @@ function run(fn){
   });
 }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
-function toast(msg,err){ var t=document.createElement('div'); t.className='toast'+(err?' err':''); t.textContent=msg; document.body.appendChild(t); setTimeout(function(){t.remove();},err?4500:2200); }
+function toast(msg,err){ document.querySelectorAll('.toast').forEach(function(x){x.remove();}); var t=document.createElement('div'); t.className='toast'+(err?' err':''); t.textContent=msg; document.body.appendChild(t); setTimeout(function(){t.remove();},err?4500:2200); }
 function fail(e){ toast((e&&e.message)||String(e),true); }
 function store(k,v){ try{ if(v===undefined) return JSON.parse(localStorage.getItem(k)); localStorage.setItem(k,JSON.stringify(v)); }catch(e){ return null; } }
 function dateES(iso){ var p=iso.split('-'); return p[2]+'/'+p[1]+'/'+p[0].slice(2); }
@@ -333,13 +333,13 @@ function woCtx(){ var tab=curTab(), day=tab.days.filter(function(d){return d.n==
 
 function renderWorkout(){
   var c=woCtx(), tab=c.tab, day=c.day, w=c.w, N=day.exercises.length, i=Math.min(S.wo.i,N), L=document.getElementById('layer');
-  var segs=day.exercises.map(function(e,k){ var l=e.loads[w]; return '<i class="'+(k===i?'c':l&&l.t?(l.g?'g':'d'):'')+'"></i>'; }).join('');
+  var segs=day.exercises.map(function(e,k){ var l=e.loads[w], dr=S.draft[dkey(tab,day,w,e)]; return '<i class="'+(k===i?'c':l&&l.t?(l.g?'g':'d'):dr&&dr.skipped?'s':'')+'"></i>'; }).join('');
   var top='<div class="wo-top"><button class="ib" id="wx" aria-label="Salir del entreno">'+I.x+'</button><div class="segs">'+segs+'</div><span class="wo-cnt">'+(i<N?(i+1)+'/'+N:'Fin')+'</span></div>';
   var body='', bot='';
   if(i>=N){
     var sv=day.exercises.filter(function(e){return e.loads[w]&&e.loads[w].t;}).length, gr=day.exercises.filter(function(e){return e.loads[w]&&e.loads[w].g;}).length;
     var fk='fin|'+key(tab.name,day.n,w), fin=store(fk)||{};
-    body='<div class="fin"><div class="wo-k">Día '+day.n+' · semana '+(w+1)+'</div><h2>'+(sv===N?'¡Día completo!':'Casi está')+'</h2><p class="mu sm" style="margin:0">'+(sv===N?'Todos los ejercicios están guardados en tu hoja.':(N-sv)+(N-sv===1?' ejercicio sin guardar':' ejercicios sin guardar')+'. Puedes volver atrás o terminar igualmente.')+'</p>'+
+    body='<div class="fin"><div class="wo-k">Día '+day.n+' · semana '+(w+1)+'</div><h2>'+(sv===N?'¡Día completo!':'Casi está')+'</h2><p class="mu sm" style="margin:0">'+(sv===N?'Todos los ejercicios están guardados en tu hoja.':(N-sv)+(N-sv===1?' ejercicio sin apuntar':' ejercicios sin apuntar')+' (saltados o pendientes). Puedes volver atrás o terminar igualmente.')+'</p>'+
       '<div class="fstats"><div><b class="n">'+sv+'/'+N+'</b><span>ejercicios</span></div><div><b class="n" style="color:var(--ok)">'+gr+'</b><span>marcas en verde</span></div><div><b class="n">'+(w+1)+'</b><span>semana</span></div></div>'+
       (tab.cardio?'<button class="chk'+(fin.c?' on':'')+'" data-x="c"><span class="bx">'+(fin.c?I.cks:'')+'</span><span><b>Cardio</b><br><span class="sm mu">'+esc(cap(tab.cardio))+'</span></span></button>':'')+
       (tab.abs.length?'<button class="chk'+(fin.a?' on':'')+'" data-x="a"><span class="bx">'+(fin.a?I.cks:'')+'</span><span style="flex:1"><b>Abdomen</b> <span class="sm mu">· 3 días por semana</span><div class="abl">'+tab.abs.map(function(a){return '<div><span>'+esc(cap(a.name))+'</span><span>'+esc(a.dose)+'</span></div>';}).join('')+'</div></span></button>':'')+'</div>';
@@ -377,7 +377,7 @@ function renderWorkout(){
     }).join('');
 
     var txt=draftText(d);
-    bot='<div class="wo-bot"><div class="pv"><span class="pvt"><span>Se escribirá</span><b>'+(txt?esc(txt):'–')+'</b></span><button class="mk'+(d.g?' on':'')+'" id="wg" role="switch" aria-checked="'+d.g+'">'+(d.g?I.cks:'')+'Marca</button></div><div class="bb"><button class="btn sec" id="wprev" aria-label="Anterior"'+(i?'':' disabled')+'>'+I.back+'</button><button class="btn" id="wsave"'+(txt?'':' disabled')+'>Guardar'+(i<N-1?' y siguiente':'')+'</button></div></div>';
+    bot='<div class="wo-bot"><div class="pv"><span class="pvt"><span>Se escribirá</span><b>'+(txt?esc(txt):'–')+'</b></span><button class="mk'+(d.g?' on':'')+'" id="wg" role="switch" aria-checked="'+d.g+'">'+(d.g?I.cks:'')+'Marca</button></div><div class="bb three"><button class="btn sec" id="wprev" aria-label="Anterior"'+(i?'':' disabled')+'>'+I.back+'</button><button class="btn sec skip" id="wskip">Saltar</button><button class="btn" id="wsave"'+(txt?'':' disabled')+'>Guardar'+(i<N-1?' y siguiente':'')+'</button></div></div>';
   }
   L.innerHTML='<div class="wo">'+top+'<div class="wo-body '+S.wo.dir+'" id="wb">'+body+'</div>'+bot+'</div>';
   S.wo.dir='';
@@ -394,15 +394,27 @@ function renderWorkout(){
   L.querySelectorAll('[data-nb]').forEach(function(b){ b.onclick=function(){ P(b).showNote=true; re(); }; });
   L.querySelectorAll('[data-note]').forEach(function(inp){ inp.onchange=function(){ P(inp).note=inp.value.trim(); re(); }; });
   if(q('wg')) q('wg').onclick=function(){ d.gAuto=false; d.g=!d.g; re(); };
-  if(q('wsave')) q('wsave').onclick=function(){
-    var b=this, txt=draftText(d), wk=day.weeks[w], pay={tab:tab.name,gid:tab.sheetId,row:ex.row,col:wk.col,text:txt,green:d.g,wasGreen:!!(ex.loads[w]&&ex.loads[w].g),baseBg:ex.baseBg};
-    b.disabled=true; b.textContent='Guardando…';
-    var ok=function(pend){ ex.loads[w]={t:txt,g:d.g,pend:pend}; d.edit=false; store('saved|'+key(tab.name,day.n,w),todayISO()); saveDrafts(); toast(pend?'Sin conexión: se subirá al volver':d.g?'Guardado · celda en verde':'Guardado en tu hoja'); go(1); };
+  var write=function(txt,green,b,label){
+    var wk=day.weeks[w], pay={tab:tab.name,gid:tab.sheetId,row:ex.row,col:wk.col,text:txt,green:green,wasGreen:!!(ex.loads[w]&&ex.loads[w].g),baseBg:ex.baseBg};
+    if(b){ b.disabled=true; b.textContent='Guardando…'; }
+    var ok=function(pend){ ex.loads[w]={t:txt,g:green,pend:pend}; d.edit=false; store('saved|'+key(tab.name,day.n,w),todayISO()); saveDrafts(); toast(pend?'Sin conexión: se subirá al volver':label); go(1); };
     run('saveExercise',pay).then(function(){ ok(false); }).catch(function(e){
       if(isNet(e)||e.auth){ var qq=(store('queue')||[]).filter(function(x){return !(x.tab===pay.tab&&x.row===pay.row&&x.col===pay.col);}); qq.push(pay); store('queue',qq); ok(true); }
-      else { fail(e); b.disabled=false; b.textContent='Guardar'; }
+      else { fail(e); if(b){ b.disabled=false; b.textContent=label; } }
     });
   };
+  if(q('wskip')) q('wskip').onclick=function(){
+    var close=sheet('<h2>Saltar ejercicio</h2><p class="mu sm" style="margin:6px 0 14px">Puedes saltarlo sin apuntar nada, o dejar el motivo en tu hoja para que lo vea tu entrenador.</p>'+
+      '<button class="opt" data-sk=""><b>Saltar sin apuntar nada</b><span>La celda se queda vacía</span></button>'+
+      ['Molestia muscular','Molestias articulares','Máquina ocupada','Sin tiempo'].map(function(r){ return '<button class="opt" data-sk="'+esc(r)+'"><b>'+esc(r)+'</b><span>Se escribirá «'+esc(r)+'» en tu hoja</span></button>'; }).join('')+
+      '<div class="fld" style="margin-top:4px"><label for="skr">Otro motivo</label><input id="skr" placeholder="Escribe el motivo" style="font-family:var(--body);font-size:18px;font-weight:600"></div>'+
+      '<button class="btn" id="sko" style="margin-top:10px">Apuntar motivo y seguir</button>');
+    document.querySelectorAll('[data-sk]').forEach(function(b){ b.onclick=function(){ var r=b.dataset.sk; close();
+      if(!r){ d.skipped=true; saveDrafts(); toast('Ejercicio saltado'); go(1); } else write(r,false,null,'Motivo apuntado en tu hoja'); }; });
+    document.getElementById('sko').onclick=function(){ var r=document.getElementById('skr').value.trim(); if(!r) return toast('Escribe el motivo',true); close(); write(r,false,null,'Motivo apuntado en tu hoja'); };
+  };
+  if(q('wsave')) q('wsave').onclick=function(){ write(draftText(d),d.g,this,d.g?'Guardado · celda en verde':'Guardado en tu hoja'); };
+
 }
 function go(step){ var N=woCtx().day.exercises.length; S.wo.i=Math.max(0,Math.min(N,S.wo.i+step)); S.wo.dir=step>0?'slide-l':'slide-r'; renderWorkout(); document.getElementById('wb').scrollTop=0; }
 function bindWorkoutCommon(N){
