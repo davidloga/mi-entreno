@@ -29,6 +29,17 @@
 <script src="src/core.js?v=1"></script>
 <script src="src/google.js?v=1"></script>
 <script src="src/ui.js?v=1"></script>
-<script>if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js');}</script>
+<script>
+/* Actualizaciones: si llega una versión nueva mientras usas la app, aparece un aviso para recargar */
+if('serviceWorker' in navigator&&location.protocol==='https:'){
+  var hadSW=!!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register('sw.js').then(function(r){ r.update(); document.addEventListener('visibilitychange',function(){ if(!document.hidden) r.update(); }); });
+  navigator.serviceWorker.addEventListener('controllerchange',function(){
+    if(!hadSW||document.getElementById('upd')) return;
+    var b=document.createElement('button'); b.id='upd'; b.className='updbar'; b.textContent='Versión nueva lista · Toca para actualizar';
+    b.onclick=function(){ location.reload(); }; document.body.appendChild(b);
+  });
+}
+</script>
 </body>
 </html>

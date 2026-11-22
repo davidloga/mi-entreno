@@ -415,3 +415,5 @@ h1,h2,h3{font-family:var(--cond);margin:0;line-height:1;font-weight:800}
 .segs i.s{background:repeating-linear-gradient(135deg,var(--mu2) 0 3px,transparent 3px 6px)}
 
 .wl-logo{width:min(82vw,340px);height:auto;margin:0 auto 6px;display:block}
+
+.updbar{position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + var(--safe-t));z-index:70;background:var(--acc);color:var(--acc-ink);border-radius:999px;padding:11px 18px;font-weight:700;font-size:14px;box-shadow:0 10px 30px -10px rgba(0,0,0,.7)}

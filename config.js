@@ -4,4 +4,4 @@ window.APP_CONFIG = {
   API_KEY: 'AIzaSyBR1gpeuUCEhzjv-Ew3kbpGaoRJO76a4gg',     // Clave de API (restringida a este dominio y a Google Picker)
   APP_ID: '672245070663'       // Número del proyecto de Google Cloud
 };
-window.APP_VERSION = '1.0';
+window.APP_VERSION = '1.7 · 22 nov';
