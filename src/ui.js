@@ -236,7 +236,7 @@ function load(){
 }
 function renderWelcome(){
   document.getElementById('nav').hidden=true;
-  $app.innerHTML='<div class="welcome"><div class="wl-mark">'+String(new Date().getDate()).padStart(2,'0')+'</div><h1>Mi Entreno</h1>'+
+  $app.innerHTML='<div class="welcome"><img class="wl-logo" src="icons/logo.png" alt="¡Entrena Cabesa!">'+
     '<p class="mu">Apunta tu entreno en un pispás y mira cuánto vas subiendo. Tus datos se quedan en tu Google Drive: la app solo ve la hoja que tú elijas.</p>'+
     '<button class="btn" id="gin">'+I.g+'Entrar con Google</button><a class="xs mu" href="privacidad.html" style="display:block;text-align:center;margin-top:16px">Privacidad</a></div>';
   document.getElementById('gin').onclick=function(){ GAPI.signIn({prompt:'select_account'}); };

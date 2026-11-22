@@ -1,6 +1,6 @@
 {
-  "name": "Mi Entreno",
-  "short_name": "Mi Entreno",
+  "name": "Entrena Cabesa",
+  "short_name": "Entrena Cabesa",
   "description": "Apunta tu entreno y sigue tu progreso sobre la hoja de Google de tu entrenador.",
   "start_url": "./",
   "scope": "./",

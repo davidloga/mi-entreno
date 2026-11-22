@@ -413,3 +413,5 @@ h1,h2,h3{font-family:var(--cond);margin:0;line-height:1;font-weight:800}
 .wo-bot .bb.three{grid-template-columns:50px 92px 1fr}
 .btn.skip{font-size:15px;padding:13px 6px}
 .segs i.s{background:repeating-linear-gradient(135deg,var(--mu2) 0 3px,transparent 3px 6px)}
+
+.wl-logo{width:min(82vw,340px);height:auto;margin:0 auto 6px;display:block}
